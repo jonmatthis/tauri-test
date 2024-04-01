@@ -30,4 +30,9 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+    compilerOptions: {
+        isCustomElement: tagName => {
+            return tagName === 'vue-advanced-chat' || tagName === 'emoji-picker'
+        }
+    }
 }));

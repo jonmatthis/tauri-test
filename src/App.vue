@@ -1,52 +1,106 @@
-<script setup lang="ts">
-// This starter template is using Vue 3 <script setup> SFCs
-// Check out https://vuejs.org/api/sfc-script-setup.html#script-setup
-import Greet from "./components/Greet.vue";
-</script>
-
 <template>
-  <div class="container">
-    <h1>Welcome to Tauri!</h1>
-
-    <div class="row">
-      <a href="https://vitejs.dev" target="_blank">
-        <img src="/vite.svg" class="logo vite" alt="Vite logo" />
-      </a>
-      <a href="https://tauri.app" target="_blank">
-        <img src="/tauri.svg" class="logo tauri" alt="Tauri logo" />
-      </a>
-      <a href="https://vuejs.org/" target="_blank">
-        <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-      </a>
-    </div>
-
-    <p>Click on the Tauri, Vite, and Vue logos to learn more.</p>
-
-    <p>
-      Recommended IDE setup:
-      <a href="https://code.visualstudio.com/" target="_blank">VS Code</a>
-      +
-      <a href="https://github.com/johnsoncodehk/volar" target="_blank">Volar</a>
-      +
-      <a href="https://github.com/tauri-apps/tauri-vscode" target="_blank"
-        >Tauri</a
-      >
-      +
-      <a href="https://github.com/rust-lang/rust-analyzer" target="_blank"
-        >rust-analyzer</a
-      >
-    </p>
-
-    <Greet />
+  <div>
+    <vue-advanced-chat
+        height="calc(100vh - 20px)"
+        :current-user-id="currentUserId"
+        :rooms="JSON.stringify(rooms)"
+        :rooms-loaded="true"
+        :messages="JSON.stringify(messages)"
+        :messages-loaded="messagesLoaded"
+        @send-message="sendMessage($event.detail[0])"
+        @fetch-messages="fetchMessages($event.detail[0])"
+    />
   </div>
 </template>
 
-<style scoped>
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
-}
+<script>
+import { register } from 'vue-advanced-chat'
+// import { register } from '../../vue-advanced-chat/dist/vue-advanced-chat.es.js'
+register()
 
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #249b73);
+export default {
+  data() {
+    return {
+      currentUserId: '1234',
+      rooms: [
+        {
+          roomId: '1',
+          roomName: 'Room 1',
+          avatar: 'https://66.media.tumblr.com/avatar_c6a8eae4303e_512.pnj',
+          users: [
+            { _id: '1234', username: 'John Doe' },
+            { _id: '4321', username: 'John Snow' }
+          ]
+        }
+      ],
+      messages: [],
+      messagesLoaded: false
+    }
+  },
+
+  methods: {
+    fetchMessages({ options = {} }) {
+      setTimeout(() => {
+        if (options.reset) {
+          this.messages = this.addMessages(true)
+        } else {
+          this.messages = [...this.addMessages(), ...this.messages]
+          this.messagesLoaded = true
+        }
+        // this.addNewMessage()
+      })
+    },
+
+    addMessages(reset) {
+      const messages = []
+
+      for (let i = 0; i < 30; i++) {
+        messages.push({
+          _id: reset ? i : this.messages.length + i,
+          content: `${reset ? '' : 'paginated'} message ${i + 1}`,
+          senderId: '4321',
+          username: 'John Doe',
+          date: '13 November',
+          timestamp: '10:20'
+        })
+      }
+
+      return messages
+    },
+
+    sendMessage(message) {
+      this.messages = [
+        ...this.messages,
+        {
+          _id: this.messages.length,
+          content: message.content,
+          senderId: this.currentUserId,
+          timestamp: new Date().toString().substring(16, 21),
+          date: new Date().toDateString()
+        }
+      ]
+    },
+
+    addNewMessage() {
+      setTimeout(() => {
+        this.messages = [
+          ...this.messages,
+          {
+            _id: this.messages.length,
+            content: 'NEW MESSAGE',
+            senderId: '1234',
+            timestamp: new Date().toString().substring(16, 21),
+            date: new Date().toDateString()
+          }
+        ]
+      }, 2000)
+    }
+  }
+}
+</script>
+
+<style lang="scss">
+body {
+  font-family: 'Quicksand', sans-serif;
 }
 </style>
